@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum GoalType {
+  LOSE_FAT
+  GAIN_MUSCLE
+  MAINTAIN
+  IMPROVE_ENDURANCE
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum WorkoutLocation {
+  GYM
+  HOME
+  BOTH
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Profile
+  age             Int?
+  heightCm        Float?
+  weightKg        Float?
+  goalType        GoalType      @default(MAINTAIN)
+  activityLevel   ActivityLevel @default(MODERATE)
+  workoutLocation WorkoutLocation @default(GYM)
+  onboardingDone  Boolean       @default(false)
+
+  // Daily targets
+  targetCalories  Int?
+  targetProteinG  Int?
+  targetCarbsG    Int?
+  targetFatG      Int?
+  targetWaterMl   Int?
+  targetSteps     Int     @default(10000)
+
+  // Relations
+  foodLogs        FoodLog[]
+  workoutLogs     WorkoutLog[]
+  hydrationLogs   HydrationLog[]
+  stepLogs        StepLog[]
+  goals           Goal[]
+  mealPlans       MealPlan[]
+  accounts        Account[]
+  sessions        Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model FoodLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  date        DateTime @default(now())
+  mealType    MealType
+  foodName    String
+  calories    Float
+  proteinG    Float
+  carbsG      Float
+  fatG        Float
+  fiberG      Float?
+  imageUrl    String?
+  aiScanned   Boolean  @default(false)
+  servingSize Float    @default(1)
+  unit        String   @default("serving")
+}
+
+model WorkoutLog {
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id])
+  date           DateTime        @default(now())
+  planName       String
+  durationMin    Int
+  caloriesBurned Float?
+  exercises      Exercise[]
+  location       WorkoutLocation
+  notes          String?
+}
+
+model Exercise {
+  id           String     @id @default(cuid())
+  workoutLogId String
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id])
+  name         String
+  sets         Int
+  reps         Int?
+  durationSec  Int?
+  weightKg     Float?
+  restSec      Int?
+  muscleGroups String[]
+}
+
+model HydrationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  amountMl  Int
+  drinkType String   @default("water")
+}
+
+model StepLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  steps     Int
+  distanceM Float?
+  source    String   @default("manual")
+}
+
+model Goal {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  title        String
+  type         GoalType
+  targetValue  Float
+  currentValue Float     @default(0)
+  unit         String
+  deadline     DateTime?
+  completed    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+}
+
+model MealPlan {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  weekStart DateTime
+  days      MealDay[]
+  createdAt DateTime  @default(now())
+}
+
+model MealDay {
+  id            String   @id @default(cuid())
+  mealPlanId    String
+  mealPlan      MealPlan @relation(fields: [mealPlanId], references: [id])
+  dayNumber     Int
+  breakfast     Json
+  lunch         Json
+  dinner        Json
+  snacks        Json
+  totalCalories Int
+  totalProtein  Float
+}
