@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Utensils, Dumbbell, Droplets,
-  TrendingUp, Target, Calendar, User, Settings, Zap,
+  TrendingUp, Target, Calendar, User, Settings,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -162,17 +162,11 @@ export function Sidebar() {
           flexShrink: 0,
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}>
-          <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '8px',
-            background: '#F97316',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Zap size={18} color="#fff" fill="#fff" strokeWidth={0} />
-          </div>
+          <img 
+            src="/repwise_icon.png" 
+            alt="RepWise Logo" 
+            style={{ width: '34px', height: '34px', borderRadius: '8px', objectFit: 'contain' }} 
+          />
         </div>
 
         {/* ── Main Nav ── */}

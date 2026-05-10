@@ -109,16 +109,19 @@ export function LoginModal() {
               <X size={15} />
             </button>
 
-            <h2 style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '20px',
-              fontWeight: 600,
-              color: '#FFFFFF',
-              marginBottom: '6px',
-              letterSpacing: '-0.02em',
-            }}>
-              Welcome to RepWise
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <img src="/repwise_icon.png" alt="RepWise Logo" style={{ width: '24px', height: '24px', borderRadius: '6px', objectFit: 'contain' }} />
+              <h2 style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#FFFFFF',
+                letterSpacing: '-0.02em',
+                margin: 0,
+              }}>
+                Welcome to RepWise
+              </h2>
+            </div>
             <p style={{
               fontSize: '14px',
               color: 'var(--text-secondary)',

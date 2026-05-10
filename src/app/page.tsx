@@ -33,15 +33,11 @@ export default async function RootPage() {
       }} className="mobile-p-4">
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            width: 30, height: 30,
-            borderRadius: 'var(--radius-sm)',
-            background: 'var(--accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <Zap size={16} color="#fff" fill="#fff" />
-          </div>
+          <img 
+            src="/repwise_icon.png" 
+            alt="RepWise Logo" 
+            style={{ width: '30px', height: '30px', borderRadius: 'var(--radius-sm)', objectFit: 'contain', flexShrink: 0 }} 
+          />
           <span style={{
             fontFamily: 'Inter, sans-serif',
             fontWeight: 600,
@@ -62,7 +58,7 @@ export default async function RootPage() {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 100%), url("/bg-hero.png")',
+        backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%), url("/bg-hero-new.jpeg")',
         backgroundSize: 'cover',
         backgroundPosition: 'center center',
         color: '#FFFFFF',

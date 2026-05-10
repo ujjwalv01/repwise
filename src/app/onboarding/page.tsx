@@ -120,9 +120,7 @@ export default function OnboardingPage() {
 
       {/* Logo */}
       <div style={{ position: 'fixed', top: 24, left: 32, display: 'flex', alignItems: 'center', gap: 8, zIndex: 999 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={18} color="#FFFFFF" fill="#FFFFFF" />
-        </div>
+        <img src="/repwise_icon.png" alt="RepWise Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain' }} />
         <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>RepWise</span>
       </div>
 
