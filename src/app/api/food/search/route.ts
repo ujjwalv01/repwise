@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const APP_ID = process.env.NUTRITIONIX_APP_ID;
-const APP_KEY = process.env.NUTRITIONIX_APP_KEY;
+const APP_ID = process.env.EDAMAM_APP_ID;
+const APP_KEY = process.env.EDAMAM_APP_KEY;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -12,22 +12,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://trackapi.nutritionix.com/v2/search/instant?query=${encodeURIComponent(query)}`, {
-      headers: {
-        'x-app-id': APP_ID!,
-        'x-app-key': APP_KEY!,
-      }
-    });
+    const res = await fetch(`https://api.edamam.com/api/food-database/v2/parser?app_id=${APP_ID}&app_key=${APP_KEY}&ingr=${encodeURIComponent(query)}`);
 
     const data = await res.json();
     
-    // We want the 'common' items for a broader range
+    // Edamam returns results in 'hints'
+    const hints = data.hints || [];
+    
     return NextResponse.json({ 
-      results: data.common.slice(0, 8).map((item: any) => ({
-        name: item.food_name,
-        image: item.photo.thumb,
-        serving_unit: item.serving_unit,
-        serving_qty: item.serving_qty,
+      results: hints.slice(0, 8).map((hint: any) => ({
+        name: hint.food.label,
+        image: hint.food.image || '/repwise_icon.png', // Fallback image if none
+        serving_unit: '100g', // Edamam generic nutrients are usually per 100g
+        serving_qty: 1,
       }))
     });
 
@@ -43,29 +40,27 @@ export async function POST(req: NextRequest) {
   try {
     const { foodName } = await req.json();
 
-    const res = await fetch('https://trackapi.nutritionix.com/v2/natural/nutrients', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-app-id': APP_ID!,
-        'x-app-key': APP_KEY!,
-        'x-remote-user-id': '0'
-      },
-      body: JSON.stringify({ query: foodName })
-    });
+    // Query Edamam again for the specific food name to get its exact macros
+    const res = await fetch(`https://api.edamam.com/api/food-database/v2/parser?app_id=${APP_ID}&app_key=${APP_KEY}&ingr=${encodeURIComponent(foodName)}`);
 
     const data = await res.json();
-    const food = data.foods[0];
+    const hints = data.hints || [];
+    
+    if (hints.length === 0) {
+      return NextResponse.json({ error: 'Food not found' }, { status: 404 });
+    }
+
+    const food = hints[0].food;
 
     return NextResponse.json({
       food: {
-        foodName: food.food_name,
-        servingSize: `${food.serving_qty} ${food.serving_unit}`,
-        calories: food.nf_calories,
-        proteinG: food.nf_protein,
-        carbsG: food.nf_total_carbohydrate,
-        fatG: food.nf_total_fat,
-        fiberG: food.nf_dietary_fiber,
+        foodName: food.label,
+        servingSize: '100g',
+        calories: food.nutrients.ENERC_KCAL || 0,
+        proteinG: food.nutrients.PROCNT || 0,
+        carbsG: food.nutrients.CHOCDF || 0,
+        fatG: food.nutrients.FAT || 0,
+        fiberG: food.nutrients.FIBTG || 0,
         confidence: 1.0
       }
     });
