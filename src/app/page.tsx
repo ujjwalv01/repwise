@@ -33,10 +33,10 @@ export default async function RootPage() {
       }} className="mobile-p-4">
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img 
-            src="/repwise_icon.png" 
-            alt="RepWise Logo" 
-            style={{ width: '30px', height: '30px', borderRadius: 'var(--radius-sm)', objectFit: 'contain', flexShrink: 0 }} 
+          <img
+            src="/repwise_icon.png"
+            alt="RepWise Logo"
+            style={{ width: '30px', height: '30px', borderRadius: 'var(--radius-sm)', objectFit: 'contain', flexShrink: 0 }}
           />
           <span style={{
             fontFamily: 'Inter, sans-serif',

@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
+import { getSession } from 'next-auth/react';
 import { UserProfile, GoalType, ActivityLevel, WorkoutLocation } from '@/types';
 import dynamic from 'next/dynamic';
 import { ChevronRight, ChevronLeft, Check, Zap } from 'lucide-react';
@@ -56,6 +57,29 @@ export default function OnboardingPage() {
     location: 'HOME' as WorkoutLocation,
   });
   const [macros, setMacros] = useState({ targetCalories: 2200, targetProteinG: 140, targetCarbsG: 220, targetFatG: 60, targetWaterMl: 2450 });
+
+  useEffect(() => {
+    // Try to get name/email from NextAuth session first, fallback to Zustand user
+    const fetchSession = async () => {
+      const session = await getSession();
+      const sourceUser = session?.user || user;
+      if (sourceUser) {
+        setForm(f => {
+          if (f.name) return f; // Already set by user typing
+          if (sourceUser.name) return { ...f, name: sourceUser.name };
+          if (sourceUser.email) {
+            // Remove numbers from the email username (e.g. ujjwal001 -> ujjwal)
+            const cleanName = sourceUser.email.split('@')[0].replace(/[0-9]/g, '');
+            // Split by dots/underscores and capitalize
+            const extracted = cleanName.split(/[\.\-_]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ').trim();
+            return { ...f, name: extracted };
+          }
+          return f;
+        });
+      }
+    };
+    fetchSession();
+  }, [user]);
 
   const STEPS = ['Details', 'Goal', 'Location', 'Activity', 'Macros'];
 
@@ -141,7 +165,7 @@ export default function OnboardingPage() {
               <StepCard title="Welcome to RepWise" subtitle="Let's set up your profile">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <Field label="Your Name">
-                    <input className="input-glass" placeholder="e.g. Arjun Sharma" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                    <input autoFocus className="input-glass" placeholder="e.g. Arjun Sharma" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                   </Field>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                     <Field label="Age"><input className="input-glass" type="number" value={form.age} onChange={e => setForm(f => ({ ...f, age: +e.target.value }))} /></Field>
@@ -258,7 +282,17 @@ export default function OnboardingPage() {
             <button className="btn-ghost" onClick={back} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <ChevronLeft size={16} /> Back
             </button>
-          ) : <div />}
+          ) : (
+            <button 
+              className="btn-ghost" 
+              onClick={() => {
+                import('next-auth/react').then(m => m.signOut({ callbackUrl: '/' }))
+              }} 
+              style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}
+            >
+              <ChevronLeft size={16} /> Home
+            </button>
+          )}
 
           {step < 4 ? (
             <motion.button className="btn-primary" onClick={next} whileTap={{ scale: 0.97 }}
